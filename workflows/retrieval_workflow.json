@@ -1,0 +1,298 @@
+{
+  "name": "Dify Retrieval API",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1664,
+        -32
+      ],
+      "id": "6697ac6c-f9e2-4ac7-93a9-7ae00d83802c",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "retrieval",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "5127a8d9-c448-4a3c-9ab9-25e13ac1ca07",
+      "name": "Dify Retrieval Webhook",
+      "webhookId": "d2bc37aa-237b-4e80-8990-070ebbb5adc1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json; \nconst headers = item.headers || {}; \nconst body = item.body || item; \n\n// 1. PRODUCTION SECURITY ROTATION: Enforce your new unexposed secret token key\nconst expectedKey = \"git-policy-n8n-secure-rag-52601\"; \nconst authHeader = headers.authorization || headers.Authorization || \"\"; \n\nif (authHeader !== \"Bearer \" + expectedKey) { \n  return [{ \n    json: { \n      error: true, \n      statusCode: 403, \n      response: { \n        error_code: 1002, \n        error_msg: \"Authorization failed: Invalid token rotation key.\" \n      } \n    } \n  }]; \n} \n\nconst knowledgeId = body.knowledge_id || \"\"; \nconst query = body.query; \nconst retrieval = body.retrieval_setting || {}; \n\n// 2. Namespace Tracking Verification\nif (knowledgeId !== \"gitlab-us-time-off\" && knowledgeId !== \"gitlab-us-time-off-chunked\") { \n  return [{ \n    json: { \n      error: true, \n      statusCode: 404, \n      response: { \n        error_code: 2001, \n        error_msg: \"Knowledge base not found\" \n      } \n    } \n  }]; \n} \n\nif (!query) { \n  return [{ \n    json: { \n      error: true, \n      statusCode: 400, \n      response: { \n        error_code: 1003, \n        error_msg: \"Missing query parameter payload\" \n      } \n    } \n  }]; \n} \n\n// 3. Return your synchronized parameters to downstream REST client nodes\nreturn [{ \n  json: { \n    query, \n    knowledge_id: knowledgeId, \n    top_k: retrieval.top_k || 8, \n    score_threshold: 0.0, \n    namespace: \"gitlab-us-time-off-chunked\" \n  } \n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "ac1b7b58-d6af-4c12-8384-d8608f67f88e",
+      "name": "Validate Dify Request - Code"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "782a8365-53e0-4750-a537-74fdd3c34a1e",
+              "leftValue": "error equals",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        384,
+        0
+      ],
+      "id": "481105f2-273f-40bb-a6e5-71fedd89307a",
+      "name": "IF - Has Error"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json.response }}",
+        "options": {
+          "responseCode": "={{ $json.statusCode }}"
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        608,
+        -112
+      ],
+      "id": "24398588-db3e-49de-8af5-960b27d696e2",
+      "name": "Respond Error - Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googlePalmApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ \"model\": \"models/gemini-embedding-001\", \"content\": { \"parts\": [ { \"text\": ($(\"Dify Retrieval Webhook\").first().json.body?.query || \"caregiver sick leave\") } ] }, \"output_dimensionality\": 3072 }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        832,
+        -32
+      ],
+      "id": "6f66ab3f-f6ca-4fd3-b2af-077c1b161467",
+      "name": "Embed Query - HTTP Req",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "mZTQsNijfM3VQoAs",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const embeddingResponse = $input.first().json; \nconst values = embeddingResponse.embedding?.values || embeddingResponse.embeddings?.[0]?.values || []; \n\nif (!values.length) { \n  throw new Error(\"No query embedding returned from Gemini API\"); \n}\n\nreturn [{ \n  json: { \n    vector: values, \n    top_k: 8, \n    score_threshold: 0.0, \n    namespace: \"gitlab-us-time-off-chunked\" \n  } \n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        -32
+      ],
+      "id": "ee34c360-9fc3-4151-b410-f3e18e5f1789",
+      "name": "Build Pinecone Query - Code"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://gitlab-us-time-off-rag-rscdefm.svc.aped-4627-b74a.pinecone.io/query",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "pineconeApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ vector: ($json.vector || $json.vectors || $json.embedding || []), topK: ($json.top_k || $json.topK || 8), namespace: \"gitlab-us-time-off-chunked\", includeMetadata: true, includeValues: false }) }}\n\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1248,
+        -32
+      ],
+      "id": "9d1eadab-22ef-4337-9aaa-3167b3017491",
+      "name": "Query Pinecone - HTTP Req",
+      "credentials": {
+        "pineconeApi": {
+          "id": "8s4aYTsJ4iOAnmqY",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const pinecone = $input.first().json; \nconst settings = $(\"Build Pinecone Query - Code\").first().json; \nconst threshold = 0.0; // Open gate to pass everything to Dify safely\nconst matches = pinecone.matches || pinecone.results || []; \n\nconst records = matches \n  .map(match => { \n    const metadata = match.metadata || (match.document && match.document.metadata) || {}; \n    const extractedContent = match.pageContent || (match.document && match.document.pageContent) || metadata.pageContent || metadata.text || \"\";\n\n    // Sanitize your tracking strings\n    const cleanFilePath = (metadata.file_path || \"\").trim();\n    const cleanSourceUrl = (metadata.source_url || \"\").trim();\n    const cleanCommitSha = (metadata.commit_sha || \"\").trim();\n\n    return { \n      content: extractedContent, \n      score: match.score || 0, \n      title: metadata.title || metadata.heading_path || cleanFilePath || \"GitLab policy chunk\", \n      metadata: { \n        // 1. DIFY MANDATORY CAMELCASE KEYS (The Secret Fix)\n        filePath: cleanFilePath,\n        sourceUrl: cleanSourceUrl,\n        commitSha: cleanCommitSha,\n        \n        // 2. LEGACY SNAKE_CASE KEYS (For fallback compatibility)\n        chunk_id: metadata.chunk_id || match.id || \"\", \n        document_id: metadata.document_id || \"\", \n        file_path: cleanFilePath, \n        source_url: cleanSourceUrl, \n        heading_path: metadata.heading_path || \"\", \n        commit_sha: cleanCommitSha, \n        blob_sha: metadata.blob_sha || \"\", \n        chunk_index: metadata.chunk_index ?? null, \n        chunk_word_count: metadata.chunk_word_count ?? null, \n        split_reason: metadata.split_reason || \"\" \n      } \n    }; \n  }) \n  .filter(record => record.content.trim().length > 0); \n\nreturn [{ json: { records } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1456,
+        -32
+      ],
+      "id": "57e78187-4b5a-4253-818e-790aff9627c2",
+      "name": "Format Dify Records - Code"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Dify Retrieval Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Dify Request - Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Dify Request - Code": {
+      "main": [
+        [
+          {
+            "node": "IF - Has Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Has Error": {
+      "main": [
+        [
+          {
+            "node": "Respond Error - Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Embed Query - HTTP Req",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond Error - Respond to Webhook": {
+      "main": [
+        [
+          {
+            "node": "Embed Query - HTTP Req",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embed Query - HTTP Req": {
+      "main": [
+        [
+          {
+            "node": "Build Pinecone Query - Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Pinecone Query - Code": {
+      "main": [
+        [
+          {
+            "node": "Query Pinecone - HTTP Req",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Pinecone - HTTP Req": {
+      "main": [
+        [
+          {
+            "node": "Format Dify Records - Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Dify Records - Code": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "d248566c-74a3-4d0f-9ad7-f56e5e61037f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "33c4f08863b2f006c04faf2fa56446cde11740396106cb65bf09bd1317a39df7"
+  },
+  "id": "YSBNCNS3QTs6qG80",
+  "tags": []
+}

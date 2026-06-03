@@ -1,0 +1,741 @@
+{
+  "name": "GitLab Time Off Policy RAG - Ingestion",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1024,
+        -208
+      ],
+      "id": "9c1983e9-7eba-4e22-9c15-1fdbe20af273",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $json.clean_text || $json.pageContent || \"GitLab Policy Content Safeguard\" }}\n\n",
+        "textSplittingMode": "custom",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "file_path",
+                "value": "={{ $json.file_path }}\n"
+              },
+              {
+                "name": "source_url",
+                "value": "={{ $json.source_url }}"
+              },
+              {
+                "name": "commit_sha",
+                "value": "={{ $json.commit_sha }}"
+              },
+              {
+                "name": "status",
+                "value": "={{ $json.status }}"
+              },
+              {
+                "name": "chunk_count",
+                "value": "={{ $json.chunk_count }}"
+              },
+              {
+                "name": "title",
+                "value": "={{ $json.metadata.title }}"
+              },
+              {
+                "name": "heading_path",
+                "value": "={{ $json.metadata.heading_path }}"
+              },
+              {
+                "name": "split_reason",
+                "value": "={{ $json.metadata.split_reason }}"
+              },
+              {
+                "name": "chunk_char_count",
+                "value": "={{ $json.metadata.chunk_char_count }}"
+              },
+              {
+                "name": "chunk_word_count",
+                "value": "={{ $json.metadata.chunk_word_count }}"
+              },
+              {
+                "name": "id",
+                "value": "={{ $json.id }}"
+              },
+              {
+                "name": "chunk_id",
+                "value": "={{ $json.id }}"
+              },
+              {
+                "name": "document_id",
+                "value": "={{$json.metadata.document_id}}"
+              },
+              {
+                "name": "repo",
+                "value": "={{$json.metadata.repo}}"
+              },
+              {
+                "name": "file_type",
+                "value": "={{$json.metadata.file_type}}"
+              },
+              {
+                "name": "source_branch",
+                "value": "={{$json.metadata.source_branch}}"
+              },
+              {
+                "name": "blob_sha",
+                "value": "={{$json.metadata.blob_sha}}"
+              },
+              {
+                "name": "chunk_index",
+                "value": "={{$json.metadata.chunk_index}}"
+              },
+              {
+                "name": "merged_small_section_count",
+                "value": "={{$json.metadata.merged_small_section_count}}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        1440,
+        -16
+      ],
+      "id": "a014333a-5f4a-4228-89c7-60a42445f8aa",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "gitlab-us-time-off-rag",
+          "mode": "list",
+          "cachedResultName": "gitlab-us-time-off-rag"
+        },
+        "embeddingBatchSize": 20,
+        "options": {
+          "pineconeNamespace": "gitlab-us-time-off-chunked"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        1392,
+        -224
+      ],
+      "id": "2b80c435-9f53-4295-b918-90156f213d8f",
+      "name": "Insert to Pinecone",
+      "credentials": {
+        "pineconeApi": {
+          "id": "8s4aYTsJ4iOAnmqY",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1264,
+        160
+      ],
+      "id": "e2e1a951-437d-4839-8702-3c1f5fb45ab5",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "mZTQsNijfM3VQoAs",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const tree = $input.first().json.tree;\n\nconst repo = \"gitlab_rag_leave_policy_source\";\nconst owner = \"M-Longoria\";\nconst sourceBranch = \"main\";\n\n// The file tree node's top-level sha is the commit/tree-ish SHA\n// used to fetch this exact repository snapshot.\nconst commitSha = $input.first().json.sha;\n\nif (!tree || !Array.isArray(tree)) {\n  throw new Error(\"GitHub tree not found or invalid\");\n}\n\nif (!commitSha) {\n  throw new Error(\"Commit SHA not found\");\n}\n\nconst repoBase =\n  \"https://raw.githubusercontent.com/\" + owner + \"/\" + repo + \"/\" + commitSha + \"/\";\n\nconst mdFiles = tree\n  .filter(item =>\n    item.type === \"blob\" &&\n    item.path &&\n    item.path.endsWith(\".md\")\n  )\n  .map(item => {\n    const cleanPath = item.path.replace(/\\\\/g, \"/\");\n\n    return {\n      json: {\n        document_id: repo + \"/\" + cleanPath,\n        file_path: cleanPath,\n        source_url: repoBase + cleanPath,\n        file_type: \"markdown\",\n        repo,\n        source_branch: sourceBranch,\n        commit_sha: commitSha,\n        blob_sha: item.sha\n      }\n    };\n  });\n\nreturn mdFiles;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -432,
+        -208
+      ],
+      "id": "038c4f80-3c13-46cd-bd53-a4c927750832",
+      "name": "Filter MD Files, Build Raw URLs, File Paths - Code in JS"
+    },
+    {
+      "parameters": {
+        "url": "={{$json.source_url}}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text",
+              "outputPropertyName": "raw_text"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -224,
+        -208
+      ],
+      "id": "c26de5ce-0cf8-4808-9f04-2d1938ba6802",
+      "name": "Fetch GitHub Raw MD Text - HTTP Req"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ------------------------------------------------------------\n// 1. Decode common HTML entities\n// ------------------------------------------------------------\n// GitHub/raw Markdown can sometimes contain HTML entities.\n// This converts the most common ones back into normal characters.\nfunction decodeHtmlEntities(text) {\n  return text\n    .replace(/&#x26;/g, \"&\")\n    .replace(/&#39;/g, \"'\")\n    .replace(/&quot;/g, '\"')\n    .replace(/&amp;/g, \"&\")\n    .replace(/&lt;/g, \"<\")\n    .replace(/&gt;/g, \">\");\n}\n\n// ------------------------------------------------------------\n// 2. Normalize escaped Markdown characters\n// ------------------------------------------------------------\n// Some Markdown exports escape punctuation like \\# or \\-.\n// This removes unnecessary backslashes while keeping the visible text.\nfunction normalizeEscapedMarkdown(text) {\n  return text\n    .replace(/\\\\#/g, \"#\")\n    .replace(/\\\\\\*/g, \"*\")\n    .replace(/\\\\_/g, \"_\")\n    .replace(/\\\\-/g, \"-\")\n    .replace(/\\\\\\+/g, \"+\")\n    .replace(/\\\\\\./g, \".\")\n    .replace(/\\\\!/g, \"!\")\n    .replace(/\\\\\\[/g, \"[\")\n    .replace(/\\\\\\]/g, \"]\")\n    .replace(/\\\\\\(/g, \"(\")\n    .replace(/\\\\\\)/g, \")\")\n    .replace(/\\\\`/g, \"`\");\n}\n\n// ------------------------------------------------------------\n// 3. Normalize whitespace and line endings\n// ------------------------------------------------------------\n// Converts Windows line endings to standard newlines,\n// reduces excessive blank lines, and trims the document edges.\nfunction normalizeWhitespace(text) {\n  return text\n    .replace(/\\r\\n/g, \"\\n\")\n    .replace(/\\r/g, \"\\n\")\n    .replace(/[ \\t]+$/gm, \"\")\n    .replace(/\\n{3,}/g, \"\\n\\n\")\n    .trim();\n}\n\n// ------------------------------------------------------------\n// 4. Remove obvious low-value noise\n// ------------------------------------------------------------\n// Keep this conservative. For RAG, deleting too much text early\n// can remove useful retrieval clues.\nfunction removeNoise(text) {\n  return text\n    .replace(/_Last modified.*$/gm, \"\");\n}\n\n// ------------------------------------------------------------\n// 5. Process each incoming n8n item\n// ------------------------------------------------------------\n// Each item represents one Markdown file. We keep the original\n// raw_text and add clean_text for downstream chunking/embedding.\nreturn items.map(i => {\n  let text = i.json.raw_text || \"\";\n\n  text = decodeHtmlEntities(text);\n  text = normalizeEscapedMarkdown(text);\n  text = normalizeWhitespace(text);\n  text = removeNoise(text);\n\n  return {\n    json: {\n      document_id: i.json.document_id,\n      file_path: i.json.file_path,\n      source_url: i.json.source_url,\n      repo: i.json.repo,\n      file_type: i.json.file_type,\n      source_branch: i.json.source_branch,\n      commit_sha: i.json.commit_sha,\n      blob_sha: i.json.blob_sha,\n      raw_text: i.json.raw_text,\n      clean_text: text,\n      clean_char_count: text.length,\n      has_content: text.trim().length > 0,\n      ingestion_status: \"cleaned\"\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        -224
+      ],
+      "id": "e5425541-4fbf-486d-aea1-0a4174ec5a50",
+      "name": "MD Normalization Layer - Code in JS"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "45d71bf8-93ed-42e0-81ba-8f8376253353",
+              "name": "raw_text",
+              "value": "={{ $json.raw_text }}",
+              "type": "string"
+            },
+            {
+              "id": "8802ddee-efbf-4af3-8176-63a2472292d0",
+              "name": "file_path",
+              "value": "={{ $json.file_path }}",
+              "type": "string"
+            },
+            {
+              "id": "6bedf053-f4e7-4231-9d82-12b4254693ba",
+              "name": "source_url",
+              "value": "={{ $json.source_url }}",
+              "type": "string"
+            },
+            {
+              "id": "476cf1e5-f59e-4161-97b9-400019df6149",
+              "name": "file_type",
+              "value": "={{ $json.file_type }}",
+              "type": "string"
+            },
+            {
+              "id": "6549f870-6f8e-47af-882b-b391b81c9efe",
+              "name": "repo",
+              "value": "={{ $json.repo }}",
+              "type": "string"
+            },
+            {
+              "id": "449446f7-d728-40ef-ad55-81c0960071b5",
+              "name": "document_id",
+              "value": "={{ $json.document_id }}",
+              "type": "string"
+            },
+            {
+              "id": "e52a631a-cc52-43d2-baa2-1857ca55b319",
+              "name": "source_branch",
+              "value": "={{ $json.source_branch }}",
+              "type": "string"
+            },
+            {
+              "id": "9ee5ea41-0adf-482f-bf8a-a66cf2c9a381",
+              "name": "commit_sha",
+              "value": "={{ $json.commit_sha }}",
+              "type": "string"
+            },
+            {
+              "id": "58f74c96-6f4c-4390-a740-66190c900f75",
+              "name": "blob_sha",
+              "value": "={{ $json.blob_sha }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        -224
+      ],
+      "id": "6cef16d4-f8e1-4aa4-9f11-9f62bf72ed67",
+      "name": "Shape RAG Doc Fields"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        16,
+        -336
+      ],
+      "id": "bb8a6be0-7d11-41ef-bc9c-ab3b6dd1f85b",
+      "name": "Merge Metadata + Raw Text Combine"
+    },
+    {
+      "parameters": {
+        "jsCode": "const TARGET_WORDS = 450;\nconst MAX_WORDS = 800;\nconst OVERLAP_BLOCKS = 1;\nconst MIN_WORDS = 20;\n\nfunction getMarkdownHeading(line) {\n  let level = 0;\n\n  while (level < line.length && level < 6 && line.charAt(level) === \"#\") {\n    level++;\n  }\n\n  if (level === 0) return null;\n  if (line.charAt(level) !== \" \") return null;\n\n  const title = line.slice(level + 1).trim();\n\n  if (!title) return null;\n\n  return {\n    level,\n    title,\n    source: \"markdown_heading\"\n  };\n}\n\nfunction getHeadingPath(path) {\n  return path.map(p => p.title).join(\" > \");\n}\n\nfunction countWords(text) {\n  return text\n    .split(\" \")\n    .map(word => word.trim())\n    .filter(Boolean)\n    .length;\n}\n\nfunction getFirstMeaningfulLine(text) {\n  const lines = text.split(\"\\n\");\n\n  for (const line of lines) {\n    const trimmed = line.trim();\n\n    if (trimmed) {\n      return trimmed;\n    }\n  }\n\n  return \"Untitled\";\n}\n\nfunction inferTitleFromText(text) {\n  const firstLine = getFirstMeaningfulLine(text);\n\n  if (firstLine.length <= 120) {\n    return firstLine;\n  }\n\n  return firstLine.slice(0, 117).trim() + \"...\";\n}\n\nfunction splitIntoBlocks(text) {\n  const lines = text.split(\"\\n\");\n  const blocks = [];\n  let current = [];\n\n  for (const line of lines) {\n    if (line.trim() === \"\") {\n      if (current.length > 0) {\n        blocks.push(current.join(\"\\n\").trim());\n        current = [];\n      }\n    } else {\n      current.push(line);\n    }\n  }\n\n  if (current.length > 0) {\n    blocks.push(current.join(\"\\n\").trim());\n  }\n\n  return blocks;\n}\n\nfunction splitLongTextByBlocks(text) {\n  const blocks = splitIntoBlocks(text);\n\n  if (countWords(text) <= MAX_WORDS) {\n    return [text];\n  }\n\n  const chunks = [];\n  let currentBlocks = [];\n  let currentWords = 0;\n\n  for (const block of blocks) {\n    const blockWords = countWords(block);\n\n    if (currentWords > 0 && currentWords + blockWords > TARGET_WORDS) {\n      chunks.push(currentBlocks.join(\"\\n\\n\"));\n\n      const overlap = currentBlocks.slice(-OVERLAP_BLOCKS);\n      currentBlocks = overlap.slice();\n      currentWords = countWords(currentBlocks.join(\"\\n\\n\"));\n    }\n\n    currentBlocks.push(block);\n    currentWords += blockWords;\n  }\n\n  if (currentBlocks.length > 0) {\n    chunks.push(currentBlocks.join(\"\\n\\n\"));\n  }\n\n  return chunks;\n}\n\nfunction splitMarkdownSections(text) {\n  const lines = text.split(\"\\n\");\n  const sections = [];\n\n  let headingPath = [];\n  let currentSection = null;\n\n  for (const line of lines) {\n    const heading = getMarkdownHeading(line);\n\n    if (heading) {\n      if (currentSection && currentSection.lines.join(\"\\n\").trim()) {\n        sections.push({\n          title: currentSection.title,\n          header_level: currentSection.header_level,\n          heading_path: currentSection.heading_path,\n          heading_source: currentSection.heading_source,\n          section_text: currentSection.lines.join(\"\\n\").trim()\n        });\n      }\n\n      headingPath = headingPath.filter(h => h.level < heading.level);\n      headingPath.push(heading);\n\n      currentSection = {\n        title: heading.title,\n        header_level: heading.level,\n        heading_path: getHeadingPath(headingPath),\n        heading_source: heading.source,\n        lines: [line]\n      };\n    } else if (currentSection) {\n      currentSection.lines.push(line);\n    } else if (line.trim()) {\n      const inferredTitle = inferTitleFromText(line);\n\n      currentSection = {\n        title: inferredTitle,\n        header_level: 0,\n        heading_path: inferredTitle,\n        heading_source: \"inferred_first_line\",\n        lines: [line]\n      };\n    }\n  }\n\n  if (currentSection && currentSection.lines.join(\"\\n\").trim()) {\n    sections.push({\n      title: currentSection.title,\n      header_level: currentSection.header_level,\n      heading_path: currentSection.heading_path,\n      heading_source: currentSection.heading_source,\n      section_text: currentSection.lines.join(\"\\n\").trim()\n    });\n  }\n\n  return sections;\n}\n\nfunction isStepSection(section) {\n  const title = (section.title || \"\").toLowerCase();\n\n  return (\n    title.startsWith(\"step \") ||\n    title.startsWith(\"step:\")\n  );\n}\n\nfunction getParentHeadingPath(section) {\n  const parts = (section.heading_path || \"\").split(\" > \");\n\n  if (parts.length <= 1) {\n    return section.heading_path;\n  }\n\n  return parts.slice(0, -1).join(\" > \");\n}\n\nfunction groupProcedureSteps(sections) {\n  const grouped = [];\n  let buffer = [];\n\n  function flushBuffer() {\n    if (buffer.length === 0) return;\n\n    if (buffer.length === 1) {\n      grouped.push(buffer[0]);\n      buffer = [];\n      return;\n    }\n\n    const first = buffer[0];\n    const parentPath = getParentHeadingPath(first);\n    const parentTitle = parentPath.split(\" > \").pop() || first.title;\n    const combinedText = buffer.map(s => s.section_text).join(\"\\n\\n\");\n\n    grouped.push({\n      title: parentTitle,\n      header_level: Math.max(first.header_level - 1, 0),\n      heading_path: parentPath,\n      heading_source: \"grouped_procedure_steps\",\n      section_text: combinedText,\n      grouped_section_count: buffer.length,\n      grouped_section_titles: buffer.map(s => s.title)\n    });\n\n    buffer = [];\n  }\n\n  for (const section of sections) {\n    if (isStepSection(section)) {\n      buffer.push(section);\n    } else {\n      flushBuffer();\n      grouped.push(section);\n    }\n  }\n\n  flushBuffer();\n\n  return grouped;\n}\n\nfunction sectionToChunks(section) {\n  const sectionWordCount = countWords(section.section_text);\n\n  if (sectionWordCount < MIN_WORDS) {\n    return [{\n      text: section.section_text,\n      split_reason: \"small_section\",\n      section_chunk_index: 0\n    }];\n  }\n\n  const chunkTexts = splitLongTextByBlocks(section.section_text);\n\n  return chunkTexts.map((text, index) => ({\n    text,\n    split_reason: chunkTexts.length > 1 ? \"oversized_section_split\" : \"section_boundary\",\n    section_chunk_index: index\n  }));\n}\n\nreturn items.flatMap(i => {\n  const cleanText = i.json.clean_text || \"\";\n\n  if (!cleanText.trim()) {\n    return [];\n  }\n\n  const sections = groupProcedureSteps(splitMarkdownSections(cleanText));\n  const output = [];\n  let chunkIndex = 0;\n\n  for (const section of sections) {\n    const sectionChunks = sectionToChunks(section);\n\n    for (const sectionChunk of sectionChunks) {\n      const chunkText = sectionChunk.text.trim();\n\n      if (!chunkText) continue;\n\n      output.push({\n        json: {\n          chunk_id: i.json.document_id + \"#chunk-\" + chunkIndex,\n          document_id: i.json.document_id,\n          chunk_index: chunkIndex,\n\n          file_path: i.json.file_path,\n          source_url: i.json.source_url,\n          repo: i.json.repo,\n          file_type: i.json.file_type,\n          source_branch: i.json.source_branch,\n          commit_sha: i.json.commit_sha,\n          blob_sha: i.json.blob_sha,\n\n          title: section.title,\n          header_level: section.header_level,\n          heading_path: section.heading_path,\n          heading_source: section.heading_source,\n\n          chunk_text: chunkText,\n          chunk_char_count: chunkText.length,\n          chunk_word_count: countWords(chunkText),\n\n          split_reason: section.grouped_section_count\n            ? sectionChunk.split_reason + \"+grouped_procedure_steps\"\n            : sectionChunk.split_reason,\n          section_chunk_index: sectionChunk.section_chunk_index ?? 0,\n          grouped_section_count: section.grouped_section_count || 0,\n          grouped_section_titles: section.grouped_section_titles || [],\n\n          ingestion_status: i.json.ingestion_status,\n          chunk_status: \"chunked\"\n        }\n      });\n\n      chunkIndex++;\n    }\n  }\n\n  return output;\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        -224
+      ],
+      "id": "f1d184c6-c8bc-4feb-a4ef-93ffbafbe56b",
+      "name": "Semantic MD Chunker - Code in JS"
+    },
+    {
+      "parameters": {
+        "url": "https://api.github.com/repos/M-Longoria/gitlab_rag_leave_policy_source/branches/main",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -832,
+        -208
+      ],
+      "id": "3b5e6e9f-b6c0-4a1e-b96d-cb7327096940",
+      "name": "Fetch GitHub Branch Commit - HTTP Req"
+    },
+    {
+      "parameters": {
+        "jsCode": "const chunks = items.map(i => i.json);\n\nconst totalChunks = chunks.length;\n\nconst tinyChunks = chunks.filter(c => c.chunk_word_count < 20);\nconst smallChunks = chunks.filter(c => c.chunk_word_count >= 20 && c.chunk_word_count < 50);\nconst mediumChunks = chunks.filter(c => c.chunk_word_count >= 50 && c.chunk_word_count <= 800);\nconst largeChunks = chunks.filter(c => c.chunk_word_count > 800);\n\nconst oversizedSplits = chunks.filter(c => c.split_reason === \"oversized_section_split\");\nconst smallSections = chunks.filter(c => c.split_reason === \"small_section\");\nconst untitledChunks = chunks.filter(c => c.title === \"Untitled\" || c.heading_path === \"Untitled\");\n\nfunction average(numbers) {\n  if (numbers.length === 0) return 0;\n\n  const total = numbers.reduce((sum, value) => sum + value, 0);\n  return Math.round(total / numbers.length);\n}\n\nfunction getExamples(list, limit) {\n  return list.slice(0, limit).map(c => ({\n    chunk_id: c.chunk_id,\n    file_path: c.file_path,\n    title: c.title,\n    heading_path: c.heading_path,\n    chunk_word_count: c.chunk_word_count,\n    split_reason: c.split_reason,\n    preview: c.chunk_text.slice(0, 250)\n  }));\n}\n\nconst wordCounts = chunks.map(c => c.chunk_word_count);\n\nreturn [{\n  json: {\n    total_chunks: totalChunks,\n\n    avg_chunk_word_count: average(wordCounts),\n    min_chunk_word_count: Math.min(...wordCounts),\n    max_chunk_word_count: Math.max(...wordCounts),\n\n    tiny_chunks_under_20: tinyChunks.length,\n    small_chunks_20_to_49: smallChunks.length,\n    medium_chunks_50_to_800: mediumChunks.length,\n    large_chunks_over_800: largeChunks.length,\n\n    oversized_section_splits: oversizedSplits.length,\n    small_sections: smallSections.length,\n    untitled_chunks: untitledChunks.length,\n\n    tiny_chunk_examples: getExamples(tinyChunks, 5),\n    large_chunk_examples: getExamples(largeChunks, 5),\n    untitled_chunk_examples: getExamples(untitledChunks, 5)\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        16
+      ],
+      "id": "7b5f3881-20f5-4c95-aa92-92dc0b965556",
+      "name": "Chunk Quality Audit - Code"
+    },
+    {
+      "parameters": {
+        "jsCode": "const MIN_WORDS = 20;\n\nfunction countWords(text) {\n  return text\n    .split(\" \")\n    .map(word => word.trim())\n    .filter(Boolean)\n    .length;\n}\n\nfunction getMarkdownHeading(line) {\n  let level = 0;\n\n  while (level < line.length && level < 6 && line.charAt(level) === \"#\") {\n    level++;\n  }\n\n  if (level === 0) return null;\n  if (line.charAt(level) !== \" \") return null;\n\n  const title = line.slice(level + 1).trim();\n\n  if (!title) return null;\n\n  return {\n    level,\n    title\n  };\n}\n\nfunction looksLikeHeadingOnly(text) {\n  const lines = text\n    .split(\"\\n\")\n    .map(line => line.trim())\n    .filter(Boolean);\n\n  if (lines.length !== 1) {\n    return false;\n  }\n\n  return getMarkdownHeading(lines[0]) !== null;\n}\n\nfunction mergeDocumentChunks(chunks) {\n  const merged = [];\n\n  for (let index = 0; index < chunks.length; index++) {\n    const chunk = chunks[index];\n    const wordCount = countWords(chunk.chunk_text);\n    const headingOnly = looksLikeHeadingOnly(chunk.chunk_text);\n\n    const shouldMerge =\n      wordCount < MIN_WORDS ||\n      headingOnly ||\n      chunk.split_reason === \"small_section\";\n\n    if (!shouldMerge) {\n      merged.push({\n        ...chunk,\n        merged_small_section_count: chunk.merged_small_section_count || 0,\n        merged_small_section_titles: chunk.merged_small_section_titles || []\n      });\n      continue;\n    }\n\n    if (headingOnly && index + 1 < chunks.length) {\n      const nextChunk = chunks[index + 1];\n\n      nextChunk.chunk_text = chunk.chunk_text + \"\\n\\n\" + nextChunk.chunk_text;\n      nextChunk.split_reason = \"merged_heading_forward+\" + nextChunk.split_reason;\n      nextChunk.merged_small_section_count =\n        (nextChunk.merged_small_section_count || 0) + 1;\n      nextChunk.merged_small_section_titles = [\n        chunk.title,\n        ...(nextChunk.merged_small_section_titles || [])\n      ];\n\n      continue;\n    }\n\n    if (merged.length > 0) {\n      const previous = merged[merged.length - 1];\n\n      previous.chunk_text = previous.chunk_text + \"\\n\\n\" + chunk.chunk_text;\n      previous.split_reason = previous.split_reason + \"+merged_small_section\";\n      previous.merged_small_section_count =\n        (previous.merged_small_section_count || 0) + 1;\n      previous.merged_small_section_titles = [\n        ...(previous.merged_small_section_titles || []),\n        chunk.title\n      ];\n\n      continue;\n    }\n\n    if (index + 1 < chunks.length) {\n      const nextChunk = chunks[index + 1];\n\n      nextChunk.chunk_text = chunk.chunk_text + \"\\n\\n\" + nextChunk.chunk_text;\n      nextChunk.split_reason = \"merged_small_section_forward+\" + nextChunk.split_reason;\n      nextChunk.merged_small_section_count =\n        (nextChunk.merged_small_section_count || 0) + 1;\n      nextChunk.merged_small_section_titles = [\n        chunk.title,\n        ...(nextChunk.merged_small_section_titles || [])\n      ];\n\n      continue;\n    }\n\n    merged.push({\n      ...chunk,\n      merged_small_section_count: chunk.merged_small_section_count || 0,\n      merged_small_section_titles: chunk.merged_small_section_titles || []\n    });\n  }\n\n  return merged;\n}\n\nconst chunksByDocument = {};\n\nfor (const item of items) {\n  const chunk = item.json;\n  const documentId = chunk.document_id;\n\n  if (!chunksByDocument[documentId]) {\n    chunksByDocument[documentId] = [];\n  }\n\n  chunksByDocument[documentId].push(chunk);\n}\n\nconst output = [];\n\nfor (const documentId of Object.keys(chunksByDocument)) {\n  const chunks = chunksByDocument[documentId].sort(\n    (a, b) => a.chunk_index - b.chunk_index\n  );\n\n  const mergedChunks = mergeDocumentChunks(chunks);\n\n  mergedChunks.forEach((chunk, index) => {\n    const chunkText = chunk.chunk_text.trim();\n\n    output.push({\n      json: {\n        ...chunk,\n        chunk_id: chunk.document_id + \"#chunk-\" + index,\n        chunk_index: index,\n        chunk_text: chunkText,\n        chunk_char_count: chunkText.length,\n        chunk_word_count: countWords(chunkText),\n        tiny_chunk_merge_status:\n          chunk.merged_small_section_count > 0 ? \"merged\" : \"not_merged\"\n      }\n    });\n  });\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        832,
+        -224
+      ],
+      "id": "61e642b8-caa9-4ae5-9f63-860d92154f9d",
+      "name": "Merge Tiny Chunks - Code"
+    },
+    {
+      "parameters": {
+        "url": "={{ \"https://api.github.com/repos/M-Longoria/gitlab_rag_leave_policy_source/git/trees/\" + $(\"Fetch GitHub Branch Commit - HTTP Req\").first().json.commit.sha + \"?recursive=1\" }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -640,
+        -208
+      ],
+      "id": "18d42fd7-db43-48d4-a368-089d69673456",
+      "name": "Fetch GitHub File Tree - HTTP Req"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items\n  .filter(item => { \n    const text = item.json.chunk_text || \"\"; \n    return text.trim().length >= 20; \n  })\n  .map(item => { \n    const chunk = item.json; \n    \n    let associatedRawText = \"\";\n    try {\n      associatedRawText = $('MD Normalization Layer - Code in JS').item.json.raw_text || \"\";\n    } catch(e) {\n      associatedRawText = chunk.chunk_text; \n    }\n\n    // PRODUCTION BEST PRACTICE: Natively trim all incoming tracking strings to prevent pollution\n    const cleanFilePath = (chunk.file_path || \"\").trim();\n    const cleanSourceUrl = (chunk.source_url || \"\").trim();\n    const cleanCommitSha = (chunk.commit_sha || \"\").trim();\n\n    return { \n      json: { \n        id: chunk.chunk_id,             \n        pinecone_vector_id: chunk.chunk_id, \n        file_path: cleanFilePath,       // Safely sanitized!\n        raw_text: associatedRawText,    \n        clean_text: chunk.chunk_text,   \n        source_url: cleanSourceUrl,     // Safely sanitized!\n        commit_hash: cleanCommitSha,    // Safely sanitized!\n        status: chunk.chunk_status || \"completed\",\n        chunk_count: chunk.chunk_index,\n\n        pageContent: chunk.chunk_text, \n        metadata: { \n          pageContent: chunk.chunk_text,\n          document_id: chunk.document_id,\n          file_path: cleanFilePath,     // Safely sanitized for Pinecone metadata tags!\n          source_url: cleanSourceUrl,   // Safely sanitized for Dify hyper-link citation mapping!\n          repo: chunk.repo,\n          file_type: chunk.file_type,\n          source_branch: chunk.source_branch,\n          commit_sha: cleanCommitSha,    // Safely sanitized!\n          blob_sha: chunk.blob_sha,\n          title: chunk.title,\n          header_level: chunk.header_level,\n          heading_path: chunk.heading_path,\n          heading_source: chunk.heading_source,\n          chunk_index: chunk.chunk_index,\n          chunk_char_count: chunk.chunk_char_count,\n          chunk_word_count: chunk.chunk_word_count,\n          split_reason: chunk.split_reason,\n          section_chunk_index: chunk.section_chunk_index,\n          merged_small_section_count: chunk.merged_small_section_count || 0,\n          merged_small_section_titles: (chunk.merged_small_section_titles || []).join(\" | \"),\n          grouped_section_count: chunk.grouped_section_count || 0,\n          grouped_section_titles: (chunk.grouped_section_titles || []).join(\" | \"),\n          ingestion_status: chunk.ingestion_status,\n          chunk_status: chunk.chunk_status\n        }\n      } \n    }; \n  });\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1024,
+        -224
+      ],
+      "id": "b16abece-65a1-4a45-8431-abb5a04b1950",
+      "name": "Prepare Pinecone Records - Code"
+    },
+    {
+      "parameters": {
+        "chunkSize": 10000,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        1504,
+        160
+      ],
+      "id": "f2ac40a4-f309-4c8d-9251-e6830dace477",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "=ingestion_docs",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "file_path": "={{ $json.metadata.file_path }}",
+            "raw_text": "={{ $json.raw_text }}",
+            "clean_text": "={{ $json.pageContent }}",
+            "status": "={{ $json.metadata.chunk_status || \"completed\" }}",
+            "source_url": "={{ $json.metadata.source_url }}",
+            "chunk_count": "={{ $json.metadata.chunk_index || 0 }}",
+            "metadata": "={{ JSON.stringify($json.metadata) }}",
+            "commit_sha": "={{ $json.metadata.commit_sha }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "file_path",
+              "displayName": "file_path",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "raw_text",
+              "displayName": "raw_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "clean_text",
+              "displayName": "clean_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "source_url",
+              "displayName": "source_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "chunk_count",
+              "displayName": "chunk_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "commit_sha",
+              "displayName": "commit_sha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "metadata",
+              "displayName": "metadata",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "object",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": true,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "outputColumns": "=*"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1216,
+        -224
+      ],
+      "id": "3596b61e-2ac5-450b-a74d-457e5c5ac324",
+      "name": "Supabase Insert or update rows in a table",
+      "credentials": {
+        "postgres": {
+          "id": "BmxM6NFbXrQmXFb3",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Fetch GitHub Branch Commit - HTTP Req",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Insert to Pinecone",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Insert to Pinecone",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter MD Files, Build Raw URLs, File Paths - Code in JS": {
+      "main": [
+        [
+          {
+            "node": "Fetch GitHub Raw MD Text - HTTP Req",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge Metadata + Raw Text Combine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch GitHub Raw MD Text - HTTP Req": {
+      "main": [
+        [
+          {
+            "node": "Merge Metadata + Raw Text Combine",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "MD Normalization Layer - Code in JS": {
+      "main": [
+        [
+          {
+            "node": "Semantic MD Chunker - Code in JS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Shape RAG Doc Fields": {
+      "main": [
+        [
+          {
+            "node": "MD Normalization Layer - Code in JS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Metadata + Raw Text Combine": {
+      "main": [
+        [
+          {
+            "node": "Shape RAG Doc Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Semantic MD Chunker - Code in JS": {
+      "main": [
+        [
+          {
+            "node": "Merge Tiny Chunks - Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch GitHub Branch Commit - HTTP Req": {
+      "main": [
+        [
+          {
+            "node": "Fetch GitHub File Tree - HTTP Req",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chunk Quality Audit - Code": {
+      "main": [
+        []
+      ]
+    },
+    "Merge Tiny Chunks - Code": {
+      "main": [
+        [
+          {
+            "node": "Prepare Pinecone Records - Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch GitHub File Tree - HTTP Req": {
+      "main": [
+        [
+          {
+            "node": "Filter MD Files, Build Raw URLs, File Paths - Code in JS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Pinecone Records - Code": {
+      "main": [
+        [
+          {
+            "node": "Supabase Insert or update rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Insert or update rows in a table": {
+      "main": [
+        [
+          {
+            "node": "Insert to Pinecone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "f439809f-cc94-4729-b3f6-0fa69cceb419",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "33c4f08863b2f006c04faf2fa56446cde11740396106cb65bf09bd1317a39df7"
+  },
+  "id": "b9m05zLiYdVXkHOo",
+  "tags": []
+}
