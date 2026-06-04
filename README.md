@@ -33,8 +33,8 @@ All team members must log their time away in Workday.
 Do you have any other questions about U.S. time off or leave policies I could help you with?
 ```
 
-> <small><small>Sources Used:</small></small>
-> <small><small>- For Sick Absences 1–5 Consecutive Days</small></small>
+> <small><small><i>Sources Used:</i></small></small>
+> <small><small><i>- For Sick Absences 1–5 Consecutive Days</i></small></small>
 </details>
 
 <details>
@@ -50,8 +50,8 @@ The provided documentation does not contain specific step-by-step instructions f
 Do you have any other questions about U.S. time off or leave policies I could help you with?
 ```
 
-> <small><small>Sources Used:</small></small>
-> <small><small>- Pay While on Caregiver Sick Leave of Absence</small></small>
+> <small><small><i>Sources Used:</i></small></small>
+> <small><small><i>- Pay While on Caregiver Sick Leave of Absence</i></small></small>
 </details>
 
 <details>
