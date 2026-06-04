@@ -31,10 +31,10 @@ Agent: 🤖 To log your time away for calling in sick today, please follow these
 All team members must log their time away in Workday.
 
 Do you have any other questions about U.S. time off or leave policies I could help you with?
+```
 
 > <small><small>Sources Used:</small></small>
 > <small><small>- For Sick Absences 1–5 Consecutive Days</small></small>
-```
 </details>
 
 <details>
@@ -45,13 +45,13 @@ User: What happens if my caregiver sick leave goes past 25 days?
 
 Agent: 🤖 If your caregiver sick leave extends beyond 25 working days, it will be unpaid by GitLab, subject to local requirements. 
 
-The provided documentation does not contain specific step-by-step instructions for requesting an extension of caregiver sick leave beyond 25 working days. For comprehensive details on leave policies and procedures, please refer to the GitLab Handbook: https://gitlab.com
+The provided documentation does not contain specific step-by-step instructions for requesting an extension of caregiver sick leave beyond 25 working days. For comprehensive details on leave policies and procedures, please refer to the GitLab Handbook.
 
 Do you have any other questions about U.S. time off or leave policies I could help you with?
+```
 
 > <small><small>Sources Used:</small></small>
 > <small><small>- Pay While on Caregiver Sick Leave of Absence</small></small>
-```
 </details>
 
 <details>
@@ -88,7 +88,7 @@ The master visual layouts of the production infrastructure components are mapped
 *Caption: The completed n8n orchestration data ingestion workflow canvas after a successful production-level execution. This framework dynamically captures raw repository text layers, cleans syntax spacing, properly reformats, creates metadata, optimizes chunking, indexes documents, and handles parallel storage streaming.*
 
 ### 2. High-Speed REST Client Retrieval Funnel (n8n Retrieval Webhook)
-![n8n Retrieval Webhook Production Logs](assets/02_retrieval_pipeline.png)
+![n8n Retrieval Webhook Production Logs](assets/02_gitlab_retrieval_pipeline.png)
 *Caption: The retrieval webhook execution thread in execution logs after a successful execution. Custom HTTP nodes manage raw web requests to calculate 3072-dimensional vector arrays via Gemini, routing searches across Pinecone namespaces under approximately 1-second operational constraints.*
 
 ### 3. Vector Score Relevance Matrix (Dify Dataset Playground)
