@@ -85,18 +85,22 @@ The master visual layouts of the production infrastructure components are mapped
 
 ### 1. Automated Data Ingestion & Splitting Engine (n8n Ingestion Workflow)
 ![n8n Ingestion Pipeline Canvas Layout](assets/01_ingestion_pipeline.png)
+
 *Caption: The completed n8n orchestration data ingestion workflow canvas after a successful production-level execution. This framework dynamically captures raw repository text layers, cleans syntax spacing, properly reformats, creates metadata, optimizes chunking, indexes documents, and handles parallel storage streaming.*
 
 ### 2. High-Speed REST Client Retrieval Funnel (n8n Retrieval Webhook)
 ![n8n Retrieval Webhook Production Logs](assets/02_gitlab_retrieval_pipeline.png)
+
 *Caption: The retrieval webhook execution thread in execution logs after a successful execution. Custom HTTP nodes manage raw web requests to calculate 3072-dimensional vector arrays via Gemini, routing searches across Pinecone namespaces under approximately 1-second operational constraints.*
 
 ### 3. Vector Score Relevance Matrix (Dify Dataset Playground)
 ![Dify Hit Testing Vector Score Validation](assets/03_knowledge_vector_scores.png)
+
 *Caption: Live validation testing within the Dify vector index dataset hit-testing playground. Natural language input phrases score between 0.67 and 0.78 for precision matching against target leave and time off policy fragments.*
 
 ### 4. Guardrailed Agent Interface & Styled Response Execution (Dify App Window)
 ![Dify Chat Agent Interface Production Output](assets/04_production_chat_output.png)
+
 *Caption: The user-facing production chat interface, streaming complete answers at 222 tokens per second. The agent strictly respects system visual emphasis rules, integrates multi-chunk policies, maps intent variations, and isolates a small blockquote bibliography at the footer without hallucinations.*
 
 ---
@@ -108,6 +112,7 @@ To provide transparency of processing integrity, pipeline automation, data sanit
 <summary>📂 Step 1: Upstream Asset Management (GitHub Repository Schema Structure)</summary>
 
 ![GitHub Upstream Policy Document Code Hierarchy](assets/11_github_file_tree_repo.png)
+
 *Caption: Visual layout of the upstream policy repository. Unstructured markdown files are organized across dedicated directory hierarchies to establish clean data lineage before pipeline ingestion triggers.*
 </details>
 
@@ -115,6 +120,7 @@ To provide transparency of processing integrity, pipeline automation, data sanit
 <summary>📂 Step 2: Ingestion Initiation (The Beginning - GitHub Fetch File Tree Extraction)</summary>
 
 ![GitHub Fetch File Tree Payload Manifest Discovery](assets/09_ingestion_initiation.png)
+
 *Caption: Visual audit of the n8n data genesis layer. This opening node maps the master GitHub repository directory tree over REST HTTP endpoints, programmatically compiling a live asset manifest of all policy documents.*
 </details>
 
@@ -122,6 +128,7 @@ To provide transparency of processing integrity, pipeline automation, data sanit
 <summary>📂 Step 3: Markdown Normalization Layer (The Middle - Custom Transformation Loop)</summary>
 
 ![n8n Markdown Normalization Layer JavaScript Node](assets/10_string_sanitation.png)
+
 *Caption: Technical layout of the custom MD Normalization Layer. This code block loops through the discovered text files and executes string cleansing rules to strip out trailing line-break formatting anomalies (`\n`) and corrupt characters before they can enter the chunking matrix.*
 </details>
 
@@ -129,6 +136,7 @@ To provide transparency of processing integrity, pipeline automation, data sanit
 <summary>📂 Step 4: Asynchronous Aggregation & Micro-Chunk Consolidation (Merge Node Engineering)</summary>
 
 ![n8n Merge Node Stream Alignment Layout](assets/07_merge_node_layout.png)
+
 *Caption: Visual configuration of the asynchronous synchronization gatekeeper. This node intercepts fragmented metadata streams and merges tracking identifiers cleanly with core raw text strings to combine cross-variables before storage routing.*
 </details>
 
@@ -136,6 +144,7 @@ To provide transparency of processing integrity, pipeline automation, data sanit
 <summary>📂 Step 5: Data Segmentation Boundary Verification (Chunk Quality Audit)</summary>
 
 ![Character Splitter Evaluation Dashboard](assets/06_chunk_quality.png)
+
 *Caption: Granular execution log evaluating chunk quality output. This review confirms optimal markdown boundary separations and sentence-overlap tracking, maximizing semantic query distance scores inside downstream vector spaces.*
 </details>
 
@@ -143,6 +152,7 @@ To provide transparency of processing integrity, pipeline automation, data sanit
 <summary>📂 Step 6: Relational Persistence, Architecture & Access Governance (Supabase RLS Mirror)</summary>
 
 ![Supabase Production Table Grid with Enabled RLS](assets/08_supabase_table_editor.png)
+
 *Caption: Live Supabase Postgres schema displaying the production relational database mirror. This database serves as a high-availability persistence backup, secured behind Row Level Security (RLS) policies to defend corporate leave files from public endpoint exploits.*
 </details>
 
@@ -150,6 +160,7 @@ To provide transparency of processing integrity, pipeline automation, data sanit
 <summary>📂 Step 7: Vector Structural Preparation (Vector Payload Matrix Compilation)</summary>
 
 ![n8n Prepare Pinecone Records Object Code Panel](assets/12_prepare_pinecone_records.png)
+
 *Caption: Operational view of the payload preparation cluster. This node transforms raw text and embedded float arrays into a strict Pinecone dictionary format—explicitly constructing unique string identifiers, array dimensions, and descriptive metadata maps for secure vector streaming.*
 </details>
 
@@ -157,6 +168,7 @@ To provide transparency of processing integrity, pipeline automation, data sanit
 <summary>📂 Step 8: Mathematical State Indexing & Semantic Coordinate Alignment (The End - Pinecone Console)</summary>
 
 ![Pinecone Namespace Matrix and Index Density](assets/05_pinecone_index_count.png)
+
 *Caption: Live production Pinecone metrics console tracking vector coordinates. This dashboard confirms the successful 100% synchronization and indexing of all 102 target corporate leave policy segments across isolated namespaces.*
 </details>
 
