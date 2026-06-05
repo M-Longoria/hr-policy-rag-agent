@@ -1,5 +1,7 @@
+
 # hr-policy-rag-agent
 A fully decoupled, enterprise-grade RAG pipeline and compliance-guardrailed AI agent engineered with n8n, Supabase, Pinecone, and Dify to programmatically ingest, split, optimize, and semantically query unstructured markdown policies using Google Gemini embeddings.
+
 
 ## 📊 System Evaluation & RAG Triad Matrix
 The system was rigorously evaluated across cross-vocabulary, out-of-scope, and direct compliance intent query vectors to measure retrieval accuracy and anti-hallucination defenses.
@@ -72,6 +74,7 @@ Do you have any other questions about U.S. time off or leave policies I could he
 ## 🗺️ Architectural Overview
 This system is a fully decoupled, production-grade Retrieval-Augmented Generation (RAG) pipeline engineered to eliminate LLM hallucinations, maintain a strict corporate compliance persona, and maximize vector search precision and semantic retrieval speeds. By moving away from all-in-one architectures, this pipeline separates the workflow into highly specialized, isolated infrastructure layers.
 
+
 ### The System Pipeline Stack:
 * **Orchestration & Transformation Layer (n8n):** Automates data ingestion, markdown normalization, metadata enrichment, chunk optimization, and manages custom REST client API query workflows.
 * **Relational Persistence Layer (Supabase Postgres):** Permanently preserves relational data schemas and mirrors source text payloads as a high-availability infrastructure fail-safe.
@@ -79,6 +82,7 @@ This system is a fully decoupled, production-grade Retrieval-Augmented Generatio
 * **Guardrailed Specialist Interface (Dify):** Anchors the conversational engine to rigid role constraints, strict fallback parameters, visual emphasis bolding patterns, and automated source citations.
 
 ---
+
 
 ## 📸 Core End-to-End Visual Workspace Demonstrations
 The master visual layouts of the production infrastructure components are mapped out below, demonstrating active pipeline execution connectivity, high-density vector mapping, and guardrailed chat delivery:
@@ -104,6 +108,7 @@ The master visual layouts of the production infrastructure components are mapped
 *Caption: The user-facing production chat interface, streaming complete answers at 222 tokens per second. The agent strictly respects system visual emphasis rules, integrates multi-chunk policies, maps intent variations, and isolates a small blockquote bibliography at the footer without hallucinations.*
 
 ---
+
 
 ## 🛠️ Chronological Data Lifecycle & Engineering Code Audits
 To provide transparency of processing integrity, pipeline automation, data sanitation, and secure state persistence, the end-to-end ingestion lifecycle is documented below in sequential execution order:
@@ -174,12 +179,14 @@ To provide transparency of processing integrity, pipeline automation, data sanit
 
 ---
 
+
 ## ⚙️ Optimized Dynamic Retrieval Settings
 To maximize contextual accuracy and bypass hardware execution thresholds, the production retrieval parameters are set to a two-stage filtering funnel:
 *   **Wide-Net Database Boundaries (Knowledge Settings):** Set to **Top-K: 9** and **Score Threshold: 0.0**. This forces the n8n REST endpoints to pull a wide matrix of text segments from Pinecone, ensuring zero contextual dropouts on long, multi-page policy document chains.
 *   **Focused Intent Re-Ranking (Agent Settings):** Powered by **`jina-reranker-v2-base-multilingual`** with parameters tuned to **Top-K: 6** and a strict semantic **Threshold: 0.20**. This limits the final slots to only the most relevant content, maintaining a streaming speed of approximately **222 tokens per second**.
 
 ---
+
 
 ## 🔒 Security, Compliance & Governance
 *   **Credential Rotation Protocol:** Implemented strict perimeter isolation by executing a full structural rotation across Google AI Studio, Pinecone, and custom n8n administrative authorization headers (`Authorization: Bearer [token]`).
@@ -189,6 +196,7 @@ To maximize contextual accuracy and bypass hardware execution thresholds, the pr
   
 ---
 
+
 ## 📈 Future Scalability & Production Roadmap
 To scale the `hr-policy-rag-agent` from an isolated staging sandbox into a live, company-wide tool for thousands of active team members, the next phase of deployment requires the following operational roadmap:
 *   **Continuous CI/CD Ingestion Loops:** Swap the manual orchestration triggers for an automated **GitHub Webhook listener** node. This ensures that the moment HR merges a pull request or updates a policy `.md` file, the pipeline automatically re-chunks the file and syncs the vector index in real-time.
@@ -196,4 +204,5 @@ To scale the `hr-policy-rag-agent` from an isolated staging sandbox into a live,
 *   **Enterprise API Tier & Rate Scaling:** Transition from staging Google AI Studio keys to production pay-as-you-go tiers to eliminate Per-Minute-Request (PMR) constraints during peak concurrent employee query windows.
 *   **Workspace Tool Embedding & SSO:** Embed the Dify chat application directly via Slack App API integrations or inject it natively into internal intranet source code as a floating web chat widget, and enforce corporate identity verification using GitLab OAuth / Okta Single Sign-On (SSO).
 *   **Data Governance & PII Masking:** Inject regex scrubbing layers inside the n8n ingestion and retrieval workflow nodes to permanently mask and sanitize Personally Identifiable Information (PII) before logging user requests.
+
 
