@@ -18,6 +18,7 @@ The system was rigorously evaluated across cross-vocabulary, out-of-scope, and d
 | **Tier 3: Cross-Border Defense**| "What is the maternity leave duration policy for Canada?" | `0.230` | 0 / 5 (None) | 5 / 5 (Fallback) | `231.50 tokens/s` | No | **PASS** |
 
 
+
 ### 📝 Live Production Chat Logs
 
 <details>
@@ -39,6 +40,7 @@ Do you have any other questions about U.S. time off or leave policies I could he
 > <small><small><i>- For Sick Absences 1–5 Consecutive Days</i></small></small>
 </details>
 
+
 <details>
 <summary>🔍 Click to view: Tier 2 - Longitudinal Policy Splitting Test</summary>
 
@@ -55,6 +57,7 @@ Do you have any other questions about U.S. time off or leave policies I could he
 > <small><small><i>Sources Used:</i></small></small>
 > <small><small><i>- Pay While on Caregiver Sick Leave of Absence</i></small></small>
 </details>
+
 
 <details>
 <summary>🔍 Click to view: Tier 3 - Cross-Border Hallucination Defense Test</summary>
@@ -81,31 +84,37 @@ This system is a fully decoupled, production-grade Retrieval-Augmented Generatio
 * **Vector Intelligence Engine (Pinecone & Google Gemini):** A custom-coded REST network infrastructure that transforms natural language queries into 3072-dimensional vector arrays to locate semantic policy chunks inside dedicated namespaces.
 * **Guardrailed Specialist Interface (Dify):** Anchors the conversational engine to rigid role constraints, strict fallback parameters, visual emphasis bolding patterns, and automated source citations.
 
+
 ---
 
 
 ## 📸 Core End-to-End Visual Workspace Demonstrations
 The master visual layouts of the production infrastructure components are mapped out below, demonstrating active pipeline execution connectivity, high-density vector mapping, and guardrailed chat delivery:
 
+
 ### 1. Automated Data Ingestion & Splitting Engine (n8n Ingestion Workflow)
 ![n8n Ingestion Pipeline Canvas Layout](assets/01_ingestion_pipeline.png)
 
 *Caption: The completed n8n orchestration data ingestion workflow canvas after a successful production-level execution. This framework dynamically captures raw repository text layers, cleans syntax spacing, properly reformats, creates metadata, optimizes chunking, indexes documents, and handles parallel storage streaming.*
+
 
 ### 2. High-Speed REST Client Retrieval Funnel (n8n Retrieval Webhook)
 ![n8n Retrieval Webhook Production Logs](assets/02_gitlab_retrieval_pipeline.png)
 
 *Caption: The retrieval webhook execution thread in execution logs after a successful execution. Custom HTTP nodes manage raw web requests to calculate 3072-dimensional vector arrays via Gemini, routing searches across Pinecone namespaces under approximately 1-second operational constraints.*
 
+
 ### 3. Vector Score Relevance Matrix (Dify Dataset Playground)
 ![Dify Hit Testing Vector Score Validation](assets/03_knowledge_vector_scores.png)
 
 *Caption: Live validation testing within the Dify vector index dataset hit-testing playground. Natural language input phrases score between 0.67 and 0.78 for precision matching against target leave and time off policy fragments.*
 
+
 ### 4. Guardrailed Agent Interface & Styled Response Execution (Dify App Window)
 ![Dify Chat Agent Interface Production Output](assets/04_production_chat_output.png)
 
 *Caption: The user-facing production chat interface, streaming complete answers at 222 tokens per second. The agent strictly respects system visual emphasis rules, integrates multi-chunk policies, maps intent variations, and isolates a small blockquote bibliography at the footer without hallucinations.*
+
 
 ---
 
@@ -121,6 +130,7 @@ To provide transparency of processing integrity, pipeline automation, data sanit
 *Caption: Visual layout of the upstream policy repository. Unstructured markdown files are organized across dedicated directory hierarchies to establish clean data lineage before pipeline ingestion triggers.*
 </details>
 
+
 <details>
 <summary>📂 Step 2: Ingestion Initiation (The Beginning - GitHub Fetch File Tree Extraction)</summary>
 
@@ -128,6 +138,7 @@ To provide transparency of processing integrity, pipeline automation, data sanit
 
 *Caption: Visual audit of the n8n data genesis layer. This opening node maps the master GitHub repository directory tree over REST HTTP endpoints, programmatically compiling a live asset manifest of all policy documents.*
 </details>
+
 
 <details>
 <summary>📂 Step 3: Markdown Normalization Layer (The Middle - Custom Transformation Loop)</summary>
@@ -137,6 +148,7 @@ To provide transparency of processing integrity, pipeline automation, data sanit
 *Caption: Technical layout of the custom MD Normalization Layer. This code block loops through the discovered text files and executes string cleansing rules to strip out trailing line-break formatting anomalies (`\n`) and corrupt characters before they can enter the chunking matrix.*
 </details>
 
+
 <details>
 <summary>📂 Step 4: Asynchronous Aggregation & Micro-Chunk Consolidation (Merge Node Engineering)</summary>
 
@@ -144,6 +156,7 @@ To provide transparency of processing integrity, pipeline automation, data sanit
 
 *Caption: Visual configuration of the asynchronous synchronization gatekeeper. This node intercepts fragmented metadata streams and merges tracking identifiers cleanly with core raw text strings to combine cross-variables before storage routing.*
 </details>
+
 
 <details>
 <summary>📂 Step 5: Data Segmentation Boundary Verification (Chunk Quality Audit)</summary>
@@ -153,6 +166,7 @@ To provide transparency of processing integrity, pipeline automation, data sanit
 *Caption: Granular execution log evaluating chunk quality output. This review confirms optimal markdown boundary separations and sentence-overlap tracking, maximizing semantic query distance scores inside downstream vector spaces.*
 </details>
 
+
 <details>
 <summary>📂 Step 6: Relational Persistence, Architecture & Access Governance (Supabase RLS Mirror)</summary>
 
@@ -160,6 +174,7 @@ To provide transparency of processing integrity, pipeline automation, data sanit
 
 *Caption: Live Supabase Postgres schema displaying the production relational database mirror. This database serves as a high-availability persistence backup, secured behind Row Level Security (RLS) policies to defend corporate leave files from public endpoint exploits.*
 </details>
+
 
 <details>
 <summary>📂 Step 7: Vector Structural Preparation (Vector Payload Matrix Compilation)</summary>
@@ -169,6 +184,7 @@ To provide transparency of processing integrity, pipeline automation, data sanit
 *Caption: Operational view of the payload preparation cluster. This node transforms raw text and embedded float arrays into a strict Pinecone dictionary format—explicitly constructing unique string identifiers, array dimensions, and descriptive metadata maps for secure vector streaming.*
 </details>
 
+
 <details>
 <summary>📂 Step 8: Mathematical State Indexing & Semantic Coordinate Alignment (The End - Pinecone Console)</summary>
 
@@ -176,6 +192,7 @@ To provide transparency of processing integrity, pipeline automation, data sanit
 
 *Caption: Live production Pinecone metrics console tracking vector coordinates. This dashboard confirms the successful 100% synchronization and indexing of all 102 target corporate leave policy segments across isolated namespaces.*
 </details>
+
 
 ---
 
@@ -185,6 +202,7 @@ To maximize contextual accuracy and bypass hardware execution thresholds, the pr
 *   **Wide-Net Database Boundaries (Knowledge Settings):** Set to **Top-K: 9** and **Score Threshold: 0.0**. This forces the n8n REST endpoints to pull a wide matrix of text segments from Pinecone, ensuring zero contextual dropouts on long, multi-page policy document chains.
 *   **Focused Intent Re-Ranking (Agent Settings):** Powered by **`jina-reranker-v2-base-multilingual`** with parameters tuned to **Top-K: 6** and a strict semantic **Threshold: 0.20**. This limits the final slots to only the most relevant content, maintaining a streaming speed of approximately **222 tokens per second**.
 
+
 ---
 
 
@@ -193,6 +211,7 @@ To maximize contextual accuracy and bypass hardware execution thresholds, the pr
 *   **Row-Level Security (RLS) Enforcement:** Implemented ironclad database access governance directly on the Supabase Postgres relational layer. Enabling **RLS** locks down public API endpoints and establishes a default "Deny All" policy, isolating database read/write actions exclusively to n8n's backend `service_role` administrator keys.
 *   **Zero-Tolerance Prompt Injection Guardrails:** Architected a high-priority token gatekeeper rule inside the core orchestration instructions. This structural constraint explicitly intercepts meta-prompt bypass attempts (e.g., "Ignore previous instructions") at the parsing phase, forcing the agent to dump adversarial payloads, preserve system parameters, and cleanly trigger a controlled fallback route.
 *   **Strict Source Anchoring:** Prompt configurations strictly limit the Dify RAG agent to the retrieved knowledge data facts only. If a target policy chunk is absent over the API tunnel, the engine completely suppresses hallucination attempts, executing a safe fallback to official handbook URLs or triggering a polite clarification dialogue.
+
   
 ---
 
