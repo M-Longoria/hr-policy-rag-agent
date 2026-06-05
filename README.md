@@ -69,7 +69,7 @@ Do you have any other questions about U.S. time off or leave policies I could he
 </details>
 
 
-## 🚀 Architectural Overview
+## 🗺️ Architectural Overview
 This system is a fully decoupled, production-grade Retrieval-Augmented Generation (RAG) pipeline engineered to eliminate LLM hallucinations, maintain a strict corporate compliance persona, and maximize vector search precision and semantic retrieval speeds. By moving away from all-in-one architectures, this pipeline separates the workflow into highly specialized, isolated infrastructure layers.
 
 ### The System Pipeline Stack:
@@ -177,7 +177,7 @@ To maximize contextual accuracy and bypass hardware execution thresholds, the pr
   
 ---
 
-## 🔮 Future Scalability & Production Roadmap
+## 📈 Future Scalability & Production Roadmap
 To scale the `hr-policy-rag-agent` from an isolated staging sandbox into a live, company-wide tool for thousands of active team members, the next phase of deployment requires the following operational roadmap:
 *   **Continuous CI/CD Ingestion Loops:** Swap the manual orchestration triggers for an automated **GitHub Webhook listener** node. This ensures that the moment HR merges a pull request or updates a policy `.md` file, the pipeline automatically re-chunks the file and syncs the vector index in real-time.
 *   **Infrastructure Cluster Migration:** Migrate the decoupled n8n and Dify instances from free-tier staging containers into self-hosted **Docker Compose** or **Kubernetes** clusters on AWS or GCP to accommodate enterprise traffic scaling.
