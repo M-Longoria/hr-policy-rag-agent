@@ -174,3 +174,14 @@ To maximize contextual accuracy and bypass hardware execution thresholds, the pr
 *   **Row-Level Security (RLS) Enforcement:** Implemented ironclad database access governance directly on the Supabase Postgres relational layer. Enabling **RLS** locks down public API endpoints and establishes a default "Deny All" policy, isolating database read/write actions exclusively to n8n's backend `service_role` administrator keys.
 *   **Zero-Tolerance Prompt Injection Guardrails:** Architected a high-priority token gatekeeper rule inside the core orchestration instructions. This structural constraint explicitly intercepts meta-prompt bypass attempts (e.g., "Ignore previous instructions") at the parsing phase, forcing the agent to dump adversarial payloads, preserve system parameters, and cleanly trigger a controlled fallback route.
 *   **Strict Source Anchoring:** Prompt configurations strictly limit the Dify RAG agent to the retrieved knowledge data facts only. If a target policy chunk is absent over the API tunnel, the engine completely suppresses hallucination attempts, executing a safe fallback to official handbook URLs or triggering a polite clarification dialogue.
+  
+---
+
+## 🔮 Future Scalability & Production Roadmap
+To scale the `hr-policy-rag-agent` from an isolated staging sandbox into a live, company-wide tool for thousands of active team members, the next phase of deployment requires the following operational roadmap:
+*   **Continuous CI/CD Ingestion Loops:** Swap the manual orchestration triggers for an automated **GitHub Webhook listener** node. This ensures that the moment HR merges a pull request or updates a policy `.md` file, the pipeline automatically re-chunks the file and syncs the vector index in real-time.
+*   **Infrastructure Cluster Migration:** Migrate the decoupled n8n and Dify instances from free-tier staging containers into self-hosted **Docker Compose** or **Kubernetes** clusters on AWS or GCP to accommodate enterprise traffic scaling.
+*   **Enterprise API Tier & Rate Scaling:** Transition from staging Google AI Studio keys to production pay-as-you-go tiers to eliminate Per-Minute-Request (PMR) constraints during peak concurrent employee query windows.
+*   **Workspace Tool Embedding & SSO:** Embed the Dify chat application directly via Slack App API integrations or inject it natively into internal intranet source code as a floating web chat widget, and enforce corporate identity verification using GitLab OAuth / Okta Single Sign-On (SSO).
+*   **Data Governance & PII Masking:** Inject regex scrubbing layers inside the n8n ingestion and retrieval workflow nodes to permanently mask and sanitize Personally Identifiable Information (PII) before logging user requests.
+
