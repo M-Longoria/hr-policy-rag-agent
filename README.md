@@ -44,25 +44,25 @@ Grounded Policy Response
 
 ### n8n Ingestion Pipeline
 
-<img src="assets/01_ingestion_pipeline.png" width="90%" alt="n8n Ingestion Workflow" />
+<img src="assets/01_ingestion_pipeline.png" width="100%" alt="n8n Ingestion Workflow" />
 <br />
 <sub><i>Figure 1. End-to-end ingestion workflow responsible for document retrieval, normalization, semantic chunking, metadata enrichment, and Pinecone indexing.</i></sub>
 
 ### Retrieval Workflow
 
-<img src="assets/12_prepare_pinecone_records.png" width="80%" alt="Retrieval Webhook" />
+<img src="assets/12_prepare_pinecone_records.png" width="100%" alt="Retrieval Webhook" />
 <br />
 <sub><i>Figure 2. Retrieval webhook execution showing embedding generation, Pinecone search, and response assembly.</i></sub>
 
 ### Vector Validation
 
-<img src="assets/03_knowledge_vector_scores.png" width="75%" alt="Retrieval quality" />
+<img src="assets/03_knowledge_vector_scores.png" width="65%" alt="Retrieval quality" />
 <br />
 <sub><i>Figure 3. Dify dataset testing used to validate retrieval quality and semantic similarity score.</i></sub>
 
 ### RAG Chat Interface
 
-<img src="assets/04_production_chat_output.png" width="75%" alt="Vector Validation" />
+<img src="assets/04_production_chat_output.png" width="60%" alt="Vector Validation" />
 <br />
 <sub><i>Figure 4. Final user-facing assistant demonstrating grounded responses with citations and prompt guardrails.</i></sub>
 
